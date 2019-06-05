@@ -21,4 +21,4 @@ COPY . .
 # Install dependencies
 RUN npm install
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["node", "/entrypoint.js"]
