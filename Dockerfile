@@ -15,5 +15,10 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | ba
 # Check that Node.js was correctly installed
 RUN node --version
 
-ADD entrypoint.sh /entrypoint.sh
+# Copy over project files
+COPY . .
+
+# Install dependencies
+RUN npm install
+
 ENTRYPOINT ["/entrypoint.sh"]
