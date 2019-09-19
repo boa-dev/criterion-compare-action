@@ -27,9 +27,8 @@ async function main() {
   // An authenticated instance of `@octokit/rest`
   const octokit = tools.github;
 
-  await octokit.repos.createCommitComment({
-    ...tools.context.repo,
-    sha: tools.context.sha,
+  await octokit.issues.createComment({
+    ...tools.context.issue,
     body: resultsAsMarkdown
   });
 
@@ -76,7 +75,7 @@ function convertToMarkdown(results) {
     )
     .join("\n");
 
-  let shortSha = tools.context.sha.slice(0,7);
+  let shortSha = tools.context.sha.slice(0, 7);
   return `## Benchmark for ${shortSha}
   <details>
     <summary>Click to view benchmark</summary>
