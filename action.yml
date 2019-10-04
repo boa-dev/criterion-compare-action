@@ -5,5 +5,7 @@ inputs:
     description: Github Token
     required: true
 runs:
-  using: "node12"
-  main: "main.js"
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - ${{ inputs.GITHUB_TOKEN }}
