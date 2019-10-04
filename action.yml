@@ -1,9 +1,5 @@
 name: "Criterion Compare Action"
 description: "Run Criterion against PRs"
-inputs:
-  myToken:
-    description: Github Token
-    required: true
 runs:
   using: "node12"
   main: "dist/index.js"
