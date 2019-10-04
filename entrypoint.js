@@ -36,7 +36,7 @@ async function main() {
   core.debug(myToken);
   const octokit = new github.GitHub(myToken);
 
-  core.debug(...context.issue);
+  core.debug(Object.keys(context.issue));
   await octokit.issues.createComment({
     ...context.issue,
     body: resultsAsMarkdown
