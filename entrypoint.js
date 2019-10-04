@@ -10,8 +10,19 @@ async function main() {
   core.debug("Checked out to master branch");
   await exec.exec("cargo", ["bench", "--", "--save-baseline", "master"]);
   core.debug("Master benchmarked");
-  const result = await exec.exec("critcmp", ["master", "changes"]);
-  const resultsAsMarkdown = convertToMarkdown(result.stdout);
+
+  const options = {};
+  options.listeners = {
+    stdout: data => {
+      myOutput += data.toString();
+    },
+    stderr: data => {
+      myError += data.toString();
+    }
+  };
+
+  await exec.exec("critcmp", ["master", "changes"], options);
+  const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
   const myToken = core.getInput("myToken");
