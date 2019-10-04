@@ -2,6 +2,9 @@ const exec = require("@actions/exec");
 const core = require("@actions/core");
 const github = require("@actions/github");
 
+const context = github.context;
+core.debug("Context: " + context);
+
 async function main() {
   core.debug("### Benchmark starting ###");
   await exec.exec("cargo", ["bench", "--", "--save-baseline", "changes"]);
@@ -31,7 +34,6 @@ async function main() {
   // An authenticated instance of `@octokit/rest`
   const myToken = core.getInput("myToken");
   core.debug(myToken);
-  const context = github.context;
   const octokit = new github.GitHub(myToken);
 
   core.debug(...context.issue);
