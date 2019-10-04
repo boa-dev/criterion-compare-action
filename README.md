@@ -24,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: actions-rs/toolchain@v1
       - uses: jasonwilliams/criterion-compare-action@move_to_actions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

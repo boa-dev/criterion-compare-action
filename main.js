@@ -6,9 +6,6 @@ const context = github.context;
 core.debug("Context: " + context);
 
 async function main() {
-  core.debug("### Installing Deps ###");
-  await exec.exec("cargo", ["install", "critcmp"]);
-
   core.debug("### Benchmark starting ###");
   await exec.exec("cargo", ["bench", "--", "--save-baseline", "changes"]);
   core.debug("Changes benchmarked");
