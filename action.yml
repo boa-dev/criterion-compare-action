@@ -1,0 +1,11 @@
+name: "Criterion Compare Action"
+description: "Run Criterion against PRs"
+inputs:
+  myToken:
+    description: Github Token
+    required: true
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - ${{ inputs.myToken }}
