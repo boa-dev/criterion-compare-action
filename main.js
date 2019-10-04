@@ -6,6 +6,9 @@ const context = github.context;
 core.debug("Context: " + context);
 
 async function main() {
+  core.debug("### Installing Deps ###");
+  await exec.exec("cargo", ["install", "critcmp"]);
+
   core.debug("### Benchmark starting ###");
   await exec.exec("cargo", ["bench", "--", "--save-baseline", "changes"]);
   core.debug("Changes benchmarked");
@@ -32,7 +35,7 @@ async function main() {
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
-  const myToken = core.getInput("myToken");
+  const myToken = core.getInput("GITHUB_TOKEN");
   core.debug(myToken);
   const octokit = new github.GitHub(myToken);
 
