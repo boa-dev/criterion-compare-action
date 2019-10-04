@@ -3,7 +3,6 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 
 const context = github.context;
-core.debug("Context: " + context);
 
 async function main() {
   core.debug("### Install Critcmp ###");
@@ -31,7 +30,6 @@ async function main() {
   };
 
   await exec.exec("critcmp", ["master", "changes"], options);
-  core.debug("myOutput: " + myOutput);
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
@@ -39,9 +37,10 @@ async function main() {
   core.debug(myToken);
   const octokit = new github.GitHub(myToken);
 
-  core.debug(Object.keys(context.issue));
   await octokit.issues.createComment({
-    ...context.issue,
+    owner: context.issue.owner,
+    repo: context.issue.repo,
+    issue_number: context.issue.number,
     body: resultsAsMarkdown
   });
 
