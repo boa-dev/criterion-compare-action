@@ -15,6 +15,7 @@ async function main() {
 
   // An authenticated instance of `@octokit/rest`
   const myToken = core.getInput("myToken");
+  core.debug(myToken);
   const octokit = new github.GitHub(myToken);
   const context = github.context;
 
