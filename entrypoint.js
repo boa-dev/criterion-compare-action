@@ -1,38 +1,30 @@
-const { Toolkit } = require("actions-toolkit");
-const tools = new Toolkit({
-  event: ["pull_request.opened", "pull_request.synchronize"]
-});
+const exec = require("@actions/exec");
+const core = require("@actions/core");
+const github = require("@actions/github");
 
 async function main() {
-  tools.log("### Benchmark starting ###");
-  await tools.runInWorkspace("cargo", [
-    "bench",
-    "--",
-    "--save-baseline",
-    "changes"
-  ]);
-  tools.log("Changes benchmarked");
-  await tools.runInWorkspace("git", ["checkout", "master"]);
-  tools.log("Checked out to master branch");
-  await tools.runInWorkspace("cargo", [
-    "bench",
-    "--",
-    "--save-baseline",
-    "master"
-  ]);
-  tools.log("Master benchmarked");
-  const result = await tools.runInWorkspace("critcmp", ["master", "changes"]);
+  core.debug("### Benchmark starting ###");
+  await exec.exec("cargo", ["bench", "--", "--save-baseline", "changes"]);
+  core.debug("Changes benchmarked");
+  await exec.exec("git", ["checkout", "master"]);
+  core.debug("Checked out to master branch");
+  await exec.exec("cargo", ["bench", "--", "--save-baseline", "master"]);
+  core.debug("Master benchmarked");
+  const result = await exec.exec("critcmp", ["master", "changes"]);
   const resultsAsMarkdown = convertToMarkdown(result.stdout);
 
   // An authenticated instance of `@octokit/rest`
-  const octokit = tools.github;
+  const myToken = core.getInput("myToken");
+  const octokit = new github.GitHub(myToken);
+  const context = github.context;
 
+  core.debug(...context.issue);
   await octokit.issues.createComment({
-    ...tools.context.issue,
+    ...context.issue,
     body: resultsAsMarkdown
   });
 
-  tools.exit.success("Succesfully run!");
+  core.debug("Succesfully run!");
 }
 
 function convertToMarkdown(results) {
@@ -75,7 +67,7 @@ function convertToMarkdown(results) {
     )
     .join("\n");
 
-  let shortSha = tools.context.sha.slice(0, 7);
+  let shortSha = context.sha.slice(0, 7);
   return `## Benchmark for ${shortSha}
   <details>
     <summary>Click to view benchmark</summary>
@@ -93,6 +85,6 @@ ${benchResults}
   try {
     await main();
   } catch (e) {
-    tools.exit.failure(`Unhanded error:\n${e}`);
+    core.setFailed(`Unhanded error:\n${e}`);
   }
 })();
