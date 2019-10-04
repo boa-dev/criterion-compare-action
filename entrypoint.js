@@ -12,6 +12,9 @@ async function main() {
   core.debug("Master benchmarked");
 
   const options = {};
+  let myOutput;
+  let myError;
+
   options.listeners = {
     stdout: data => {
       myOutput += data.toString();
@@ -22,6 +25,7 @@ async function main() {
   };
 
   await exec.exec("critcmp", ["master", "changes"], options);
+  core.debug("myOutput: " + myOutput);
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
