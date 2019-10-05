@@ -35,11 +35,13 @@ async function main() {
   // An authenticated instance of `@octokit/rest`
   const myToken = core.getInput("GITHUB_TOKEN");
   core.debug(myToken);
+  console.log(myToken);
   const octokit = new github.GitHub(myToken);
 
   core.debug(context.issue.owner);
   core.debug(context.issue.repo);
-
+  console.log(context.issue.owner);
+  console.log(context.issue.repo);
   await octokit.issues.createComment({
     owner: "jasonwilliams",
     repo: "boa",
