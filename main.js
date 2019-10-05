@@ -38,6 +38,7 @@ async function main() {
   console.log(myToken);
   const octokit = new github.GitHub(myToken);
 
+  console.log("---+---");
   core.debug(context.issue.owner);
   core.debug(context.issue.repo);
   console.log(context.issue.owner);
