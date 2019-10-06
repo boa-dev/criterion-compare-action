@@ -5,11 +5,7 @@ const github = require("@actions/github");
 const context = github.context;
 
 async function main() {
-  console.log(process.env["GITHUB_TOKEN"]);
-  const myToken = core.getInput("GITHUB_TOKEN");
-
-  core.debug(myToken);
-  console.log(myToken);
+  const myToken = process.env["GITHUB_TOKEN"];
 
   core.debug("### Install Critcmp ###");
   await exec.exec("cargo", ["install", "critcmp"]);
@@ -42,12 +38,24 @@ async function main() {
   const octokit = new github.GitHub(myToken);
 
   const contextObj = { ...context.issue };
-  await octokit.issues.createComment({
-    owner: contextObj.owner,
-    repo: contextObj.repo,
-    issue_number: contextObj.number,
-    body: resultsAsMarkdown
-  });
+
+  try {
+    await octokit.issues.createComment({
+      owner: contextObj.owner,
+      repo: contextObj.repo,
+      issue_number: contextObj.number,
+      body: resultsAsMarkdown
+    });
+  } catch (e) {
+    // If we can't post to the comment, display results here.
+    // forkedRepos only have READ ONLY access on GITHUB_TOKEN
+    // https://github.community/t5/GitHub-Actions/quot-Resource-not-accessible-by-integration-quot-for-adding-a/td-p/33925
+    const resultsAsObject = convertToTableObject(myOutput);
+    console.table(resultsAsObject);
+
+    core.debug(e);
+    core.debug("Failed to comment");
+  }
 
   core.debug("Succesfully run!");
 }
@@ -103,6 +111,53 @@ ${benchResults}
 
   </details>
   `;
+}
+
+function convertToTableObject(results) {
+  /* Example results: 
+    group                            changes                                master
+    -----                            -------                                ------
+    character module                 1.03     22.2±0.41ms        ? B/sec    1.00     21.6±0.53ms        ? B/sec
+    directory module – home dir      1.02     21.7±0.69ms        ? B/sec    1.00     21.4±0.44ms        ? B/sec
+    full prompt                      1.08     46.0±0.90ms        ? B/sec    1.00     42.7±0.79ms        ? B/sec
+  */
+
+  let resultLines = results.split("\n");
+  let benchResults = resultLines
+    .slice(2) // skip headers
+    .map(row => row.split(/\s{2,}/)) // split if 2+ spaces together
+    .map(
+      ([
+        name,
+        changesFactor,
+        changesDuration,
+        _changesBandwidth,
+        masterFactor,
+        masterDuration,
+        _masterBandwidth
+      ]) => {
+        changesFactor = Number(changesFactor);
+        masterFactor = Number(masterFactor);
+
+        let difference = 100;
+        if (changesFactor < masterFactor) {
+          changesDuration = `**${changesDuration}**`;
+          difference = (2 - masterFactor) * 100;
+        } else if (changesFactor > masterFactor) {
+          masterDuration = `**${masterDuration}**`;
+          difference = changesFactor * 100;
+        }
+
+        return {
+          name,
+          changesDuration,
+          masterDuration,
+          difference
+        };
+      }
+    );
+
+  return benchResults;
 }
 
 // IIFE to be able to use async/await
