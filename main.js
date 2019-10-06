@@ -41,8 +41,8 @@ async function main() {
   console.log("---+---");
   core.debug(context.issue.owner);
   core.debug(context.issue.repo);
-  console.log(context.issue.owner);
-  console.log(context.issue.repo);
+  console.log(JSON.stringify(context));
+  console.log(JSON.stringify(context.payload));
   await octokit.issues.createComment({
     owner: "jasonwilliams",
     repo: "boa",
