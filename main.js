@@ -11,11 +11,25 @@ async function main() {
   await exec.exec("cargo", ["install", "critcmp"]);
 
   core.debug("### Benchmark starting ###");
-  await exec.exec("cargo", ["bench", "--", "--save-baseline", "changes"]);
+  await exec.exec("cargo", [
+    "bench",
+    "-p",
+    "Boa",
+    "--",
+    "--save-baseline",
+    "changes"
+  ]);
   core.debug("Changes benchmarked");
   await exec.exec("git", ["checkout", "master"]);
   core.debug("Checked out to master branch");
-  await exec.exec("cargo", ["bench", "--", "--save-baseline", "master"]);
+  await exec.exec("cargo", [
+    "bench",
+    "-p",
+    "Boa",
+    "--",
+    "--save-baseline",
+    "master"
+  ]);
   core.debug("Master benchmarked");
 
   const options = {};
