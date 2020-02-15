@@ -33,7 +33,9 @@ async function main() {
   core.debug("Master benchmarked");
   await exec.exec("ls", ["-lah"]);
   await exec.exec("ls", ["-lah", "./boa/target"]);
+  await exec.exec("ls", ["-lah", "./boa/target/criterion"]);
   await exec.exec("ls", ["-lah", "./target"]);
+  await exec.exec("ls", ["-lah", "/home/runner/work/boa/boa/target/criterion"]);
 
   const options = {};
   let myOutput;
