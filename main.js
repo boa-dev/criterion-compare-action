@@ -46,14 +46,14 @@ async function main() {
   let myOutput;
   let myError;
 
+  options.cwd = "boa";
   options.listeners = {
     stdout: data => {
       myOutput += data.toString();
     },
     stderr: data => {
       myError += data.toString();
-    },
-    cwd: "./boa"
+    }
   };
 
   await exec.exec("critcmp", ["master", "changes"], options);
