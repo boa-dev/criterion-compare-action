@@ -31,6 +31,7 @@ async function main() {
     "master"
   ]);
   core.debug("Master benchmarked");
+  await exec.exec("pwd");
   await exec.exec("ls", ["-lah"]);
   await exec.exec("ls", ["-lah", "./boa/target"]);
   await exec.exec("ls", ["-lah", "./boa/target/criterion"]);
