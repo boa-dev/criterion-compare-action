@@ -53,7 +53,7 @@ async function main() {
     stderr: data => {
       myError += data.toString();
     },
-    cwd: "boa"
+    cwd: "./boa"
   };
 
   await exec.exec("critcmp", ["master", "changes"], options);
