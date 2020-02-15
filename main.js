@@ -36,6 +36,7 @@ async function main() {
   let myOutput;
   let myError;
 
+  options.cwd = "./boa";
   options.listeners = {
     stdout: data => {
       myOutput += data.toString();
