@@ -31,6 +31,7 @@ async function main() {
     "master"
   ]);
   core.debug("Master benchmarked");
+  // PWD - /home/runner/work/boa/boa
   await exec.exec("pwd");
   await exec.exec("ls", ["-lah"]);
   await exec.exec("ls", ["-lah", "./boa/target"]);
@@ -51,7 +52,8 @@ async function main() {
     },
     stderr: data => {
       myError += data.toString();
-    }
+    },
+    cwd: "boa"
   };
 
   await exec.exec("critcmp", ["master", "changes"], options);
