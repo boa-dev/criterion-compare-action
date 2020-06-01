@@ -101,7 +101,7 @@ function convertToMarkdown(results) {
         changesFactor = Number(changesFactor);
         masterFactor = Number(masterFactor);
 
-        let difference = (changesFactor - masterFactor) * 100;
+        let difference = (changesFactor <= masterFactor ? "" : "+") + (changesFactor - masterFactor) * 100;
         if (changesFactor < masterFactor) {
           changesDuration = `**${changesDuration}**`;
         } else if (changesFactor > masterFactor) {
