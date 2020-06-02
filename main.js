@@ -152,13 +152,12 @@ function convertToTableObject(results) {
         changesFactor = Number(changesFactor);
         masterFactor = Number(masterFactor);
 
-        let difference = 100;
+        let difference = -(1 - changesFactor / masterFactor) * 100;
+        difference = (changesFactor <= masterFactor ? "" : "+") + difference.toPrecision(2);
         if (changesFactor < masterFactor) {
           changesDuration = `**${changesDuration}**`;
-          difference = (2 - masterFactor) * 100;
         } else if (changesFactor > masterFactor) {
           masterDuration = `**${masterDuration}**`;
-          difference = changesFactor * 100;
         }
 
         return {
