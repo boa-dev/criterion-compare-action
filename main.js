@@ -47,7 +47,7 @@ async function main() {
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
-  const octokit = new github.GitHub(myToken);
+  const octokit = github.getOctokit(myToken);
 
   const contextObj = { ...context.issue };
 
