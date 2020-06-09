@@ -6,6 +6,7 @@ const context = github.context;
 
 async function main() {
   const myToken = core.getInput("token", { required: true });
+  const options = {};
   if ((cwd = core.getInput("cwd"))) {
     options.cwd = cwd;
   }
@@ -14,7 +15,6 @@ async function main() {
   await exec.exec("cargo", ["install", "critcmp"]);
 
   core.debug("### Benchmark starting ###");
-  core.debug(`${package}`);
   await exec.exec(
     "cargo",
     ["bench", "--", "--save-baseline", "changes"],
@@ -30,7 +30,6 @@ async function main() {
   );
   core.debug("Master benchmarked");
 
-  const options = {};
   let myOutput;
   let myError;
   let cwd;
