@@ -25,6 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: jasonwilliams/criterion-compare-action@move_to_actions
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          cwd: "subDirectory (optional)"
+          token: ${{ secrets.GITHUB_TOKEN }}
 ```

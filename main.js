@@ -5,45 +5,36 @@ const github = require("@actions/github");
 const context = github.context;
 
 async function main() {
-  const myToken = process.env["GITHUB_TOKEN"];
+  const myToken = core.getInput("token", { required: true });
 
   core.debug("### Install Critcmp ###");
   await exec.exec("cargo", ["install", "critcmp"]);
 
   core.debug("### Benchmark starting ###");
-  await exec.exec("cargo", [
-    "bench",
-    "-p",
-    "Boa",
-    "--",
-    "--save-baseline",
-    "changes"
-  ]);
+  await exec.exec("cargo", ["bench", "--", "--save-baseline", "changes"]);
   core.debug("Changes benchmarked");
   await exec.exec("git", ["checkout", "master"]);
   core.debug("Checked out to master branch");
-  await exec.exec("cargo", [
-    "bench",
-    "-p",
-    "Boa",
-    "--",
-    "--save-baseline",
-    "master"
-  ]);
+  await exec.exec("cargo", ["bench", "--", "--save-baseline", "master"]);
   core.debug("Master benchmarked");
 
   const options = {};
   let myOutput;
   let myError;
+  let cwd;
 
-  options.cwd = "boa";
+  // Set CWD if one is passed
+  if ((cwd = core.getInput("cwd"))) {
+    options.cwd = cwd;
+  }
+
   options.listeners = {
-    stdout: data => {
+    stdout: (data) => {
       myOutput += data.toString();
     },
-    stderr: data => {
+    stderr: (data) => {
       myError += data.toString();
-    }
+    },
   };
 
   await exec.exec("critcmp", ["master", "changes"], options);
@@ -59,7 +50,7 @@ async function main() {
       owner: contextObj.owner,
       repo: contextObj.repo,
       issue_number: contextObj.number,
-      body: resultsAsMarkdown
+      body: resultsAsMarkdown,
     });
   } catch (e) {
     // If we can't post to the comment, display results here.
@@ -87,7 +78,7 @@ function convertToMarkdown(results) {
   let resultLines = results.split("\n");
   let benchResults = resultLines
     .slice(2) // skip headers
-    .map(row => row.split(/\s{2,}/)) // split if 2+ spaces together
+    .map((row) => row.split(/\s{2,}/)) // split if 2+ spaces together
     .map(
       ([
         name,
@@ -96,12 +87,14 @@ function convertToMarkdown(results) {
         _changesBandwidth,
         masterFactor,
         masterDuration,
-        _masterBandwidth
+        _masterBandwidth,
       ]) => {
         changesFactor = Number(changesFactor);
         masterFactor = Number(masterFactor);
 
-        let difference = (changesFactor <= masterFactor ? "" : "+") + (changesFactor - masterFactor) * 100;
+        let difference =
+          (changesFactor <= masterFactor ? "" : "+") +
+          (changesFactor - masterFactor) * 100;
         if (changesFactor < masterFactor) {
           changesDuration = `**${changesDuration}**`;
         } else if (changesFactor > masterFactor) {
@@ -138,7 +131,7 @@ function convertToTableObject(results) {
   let resultLines = results.split("\n");
   let benchResults = resultLines
     .slice(2) // skip headers
-    .map(row => row.split(/\s{2,}/)) // split if 2+ spaces together
+    .map((row) => row.split(/\s{2,}/)) // split if 2+ spaces together
     .map(
       ([
         name,
@@ -147,13 +140,15 @@ function convertToTableObject(results) {
         _changesBandwidth,
         masterFactor,
         masterDuration,
-        _masterBandwidth
+        _masterBandwidth,
       ]) => {
         changesFactor = Number(changesFactor);
         masterFactor = Number(masterFactor);
 
         let difference = -(1 - changesFactor / masterFactor) * 100;
-        difference = (changesFactor <= masterFactor ? "" : "+") + difference.toPrecision(2);
+        difference =
+          (changesFactor <= masterFactor ? "" : "+") +
+          difference.toPrecision(2);
         if (changesFactor < masterFactor) {
           changesDuration = `**${changesDuration}**`;
         } else if (changesFactor > masterFactor) {
@@ -164,7 +159,7 @@ function convertToTableObject(results) {
           name,
           changesDuration,
           masterDuration,
-          difference
+          difference,
         };
       }
     );
