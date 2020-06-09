@@ -7,6 +7,10 @@ const context = github.context;
 async function main() {
   const myToken = core.getInput("token", { required: true });
   const options = {};
+  let myOutput;
+  let myError;
+  let cwd;
+
   if ((cwd = core.getInput("cwd"))) {
     options.cwd = cwd;
   }
@@ -29,10 +33,6 @@ async function main() {
     options
   );
   core.debug("Master benchmarked");
-
-  let myOutput;
-  let myError;
-  let cwd;
 
   options.listeners = {
     stdout: (data) => {
