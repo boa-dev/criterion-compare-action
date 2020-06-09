@@ -6,16 +6,32 @@ const context = github.context;
 
 async function main() {
   const myToken = core.getInput("token", { required: true });
+  const package = core.getInput("package")
+    ? `-p ${core.getInput("package")}`
+    : "";
 
   core.debug("### Install Critcmp ###");
   await exec.exec("cargo", ["install", "critcmp"]);
 
   core.debug("### Benchmark starting ###");
-  await exec.exec("cargo", ["bench", "--", "--save-baseline", "changes"]);
+  core.debug(`${package}`);
+  await exec.exec("cargo", [
+    "bench",
+    package,
+    "--",
+    "--save-baseline",
+    "changes",
+  ]);
   core.debug("Changes benchmarked");
   await exec.exec("git", ["checkout", "master"]);
   core.debug("Checked out to master branch");
-  await exec.exec("cargo", ["bench", "--", "--save-baseline", "master"]);
+  await exec.exec("cargo", [
+    "bench",
+    package,
+    "--",
+    "--save-baseline",
+    "master",
+  ]);
   core.debug("Master benchmarked");
 
   const options = {};

@@ -1,13 +1,17 @@
 name: "Criterion Compare Action"
 description: "Run Criterion against PRs"
 inputs:
+  token:
+    description: "Github Token required to upload to the PR"
+    required: true
+    default: ""
   cwd:
     description: "Sets the directory to run the benchmarks, relative to the project directory"
     required: false
     default: ""
-  token:
-    description: "Github Token required to upload to the PR"
-    required: true
+  package:
+    description: "The package to benchmark (if you use workspaces)"
+    required: false
     default: ""
 runs:
   using: "node12"
