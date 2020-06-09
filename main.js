@@ -6,43 +6,34 @@ const context = github.context;
 
 async function main() {
   const myToken = core.getInput("token", { required: true });
-  const package = core.getInput("package")
-    ? `-p ${core.getInput("package")}`
-    : "";
+  if ((cwd = core.getInput("cwd"))) {
+    options.cwd = cwd;
+  }
 
   core.debug("### Install Critcmp ###");
   await exec.exec("cargo", ["install", "critcmp"]);
 
   core.debug("### Benchmark starting ###");
   core.debug(`${package}`);
-  await exec.exec("cargo", [
-    "bench",
-    package,
-    "--",
-    "--save-baseline",
-    "changes",
-  ]);
+  await exec.exec(
+    "cargo",
+    ["bench", "--", "--save-baseline", "changes"],
+    options
+  );
   core.debug("Changes benchmarked");
   await exec.exec("git", ["checkout", "master"]);
   core.debug("Checked out to master branch");
-  await exec.exec("cargo", [
-    "bench",
-    package,
-    "--",
-    "--save-baseline",
-    "master",
-  ]);
+  await exec.exec(
+    "cargo",
+    ["bench", "--", "--save-baseline", "master"],
+    options
+  );
   core.debug("Master benchmarked");
 
   const options = {};
   let myOutput;
   let myError;
   let cwd;
-
-  // Set CWD if one is passed
-  if ((cwd = core.getInput("cwd"))) {
-    options.cwd = cwd;
-  }
 
   options.listeners = {
     stdout: (data) => {

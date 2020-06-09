@@ -9,10 +9,6 @@ inputs:
     description: "Sets the directory to run the benchmarks, relative to the project directory"
     required: false
     default: ""
-  package:
-    description: "The package to benchmark (if you use workspaces)"
-    required: false
-    default: ""
 runs:
   using: "node12"
   main: "dist/index.js"
