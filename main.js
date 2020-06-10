@@ -144,7 +144,7 @@ function convertToMarkdown(results) {
         let masterErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
 
         let difference = -(1 - changesFactor / masterFactor) * 100;
-        difference = (changesFactor <= masterFactor ? "" : "+") + difference.toPrecision(2);
+        difference = (changesFactor <= masterFactor ? "" : "+") + difference.toPrecision(2) + "%";
         if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
           if (changesFactor < masterFactor) {
             changesDuration = `**${changesDuration}**`;
