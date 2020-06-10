@@ -126,7 +126,10 @@ function convertToMarkdown(results) {
         masterDuration,
         _masterBandwidth,
       ]) => {
-        if (!name) {
+        let masterUndefined = typeof masterDuration === "undefined";
+        let changesUndefined = typeof changesDuration === "undefined";
+
+        if (!name || (masterUndefined && changesUndefined)) {
           return "";
         }
 
@@ -141,18 +144,28 @@ function convertToMarkdown(results) {
         let masterDurSplit = masterDuration.split('±');
         let masterUnits = masterDurSplit[1].slice(-2);
         let masterDurSecs = convertDurToSeconds(masterDurSplit[0], masterUnits);
-        let masterErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
+        let masterErrorSecs = convertDurToSeconds(masterDurSplit[1].slice(0, -2), masterUnits);
 
-        let difference = -(1 - changesFactor / masterFactor) * 100;
-        difference = (changesFactor <= masterFactor ? "" : "+") + difference.toFixed(2) + "%";
+        let difference = -(1 - changesDurSecs / masterDurSecs) * 100;
+        difference = (changesDurSecs <= masterDurSecs ? "-" : "+") + difference.toFixed(2) + "%";
         if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
-          if (changesFactor < masterFactor) {
+          if (changesDurSecs < masterDurSecs) {
             changesDuration = `**${changesDuration}**`;
-          } else if (changesFactor > masterFactor) {
+          } else if (changesDurSecs > masterDurSecs) {
             masterDuration = `**${masterDuration}**`;
           }
 
           difference = `**${difference}**`;
+        }
+
+        if (masterUndefined) {
+          masterDuration = "N/A";
+          difference = "N/A"
+        }
+
+        if (changesUndefined) {
+          changesDuration = "N/A";
+          difference = "N/A"
         }
 
         return `| ${name} | ${changesDuration} | ${masterDuration} | ${difference} |`;
