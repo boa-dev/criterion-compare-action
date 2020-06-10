@@ -97,9 +97,9 @@ function convertDurToSeconds(dur, units) {
 
 function isSignificant(changesDur, changesErr, masterDur, masterErr) {
   if (changesDur < masterDur) {
-    return chagesDur + changesErr < masterDur || masterDur - masterErr > changesDur;
+    return changesDur + changesErr < masterDur || masterDur - masterErr > changesDur;
   } else {
-    return chagesDur - changesErr > masterDur || masterDur + masterErr < changesDur;
+    return changesDur - changesErr > masterDur || masterDur + masterErr < changesDur;
   }
 }
 
