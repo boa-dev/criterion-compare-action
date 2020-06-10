@@ -72,6 +72,37 @@ async function main() {
   core.debug("Succesfully run!");
 }
 
+function convertDurToSeconds(dur, units) {
+  let seconds;
+  switch (units) {
+    case "s":
+      seconds = dur;
+      break;
+    case "ms":
+      seconds = dur / 1000;
+      break;
+    case "µs":
+      seconds = dur / 1000000;
+      break;
+    case "ns":
+      seconds = dur / 1000000000;
+      break;
+    default:
+      seconds = dur;
+      break;
+  }
+
+  return seconds;
+}
+
+function isSignificant(changesDur, changesErr, masterDur, masterErr) {
+  if (changesDur < masterDur) {
+    return chagesDur + changesErr < masterDur || masterDur - masterErr > changesDur;
+  } else {
+    return chagesDur - changesErr > masterDur || masterDur + masterErr < changesDur;
+  }
+}
+
 function convertToMarkdown(results) {
   /* Example results: 
     group                            changes                                master
@@ -95,19 +126,36 @@ function convertToMarkdown(results) {
         masterDuration,
         _masterBandwidth,
       ]) => {
+        if (!name) {
+          return "";
+        }
+
         changesFactor = Number(changesFactor);
         masterFactor = Number(masterFactor);
 
-        let difference =
-          (changesFactor <= masterFactor ? "" : "+") +
-          (changesFactor - masterFactor) * 100;
-        if (changesFactor < masterFactor) {
-          changesDuration = `**${changesDuration}**`;
-        } else if (changesFactor > masterFactor) {
-          masterDuration = `**${masterDuration}**`;
+        let changesDurSplit = changesDuration.split('±');
+        let changesUnits = changesDurSplit[1].slice(-2);
+        let changesDurSecs = convertDurToSeconds(changesDurSplit[0], changesUnits);
+        let changesErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
+
+        let masterDurSplit = masterDuration.split('±');
+        let masterUnits = masterDurSplit[1].slice(-2);
+        let masterDurSecs = convertDurToSeconds(masterDurSplit[0], masterUnits);
+        let masterErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
+
+        let difference = -(1 - changesFactor / masterFactor) * 100;
+        difference = (changesFactor <= masterFactor ? "" : "+") + difference.toFixed(2) + "%";
+        if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
+          if (changesFactor < masterFactor) {
+            changesDuration = `**${changesDuration}**`;
+          } else if (changesFactor > masterFactor) {
+            masterDuration = `**${masterDuration}**`;
+          }
+
+          difference = `**${difference}**`;
         }
 
-        return `| ${name} | ${changesDuration} | ${masterDuration} | ${difference}% |`;
+        return `| ${name} | ${changesDuration} | ${masterDuration} | ${difference} |`;
       }
     )
     .join("\n");
