@@ -104,7 +104,7 @@ function isSignificant(changesDur, changesErr, masterDur, masterErr) {
 }
 
 function convertToMarkdown(results) {
-  /* Example results: 
+  /* Example results:
     group                            changes                                master
     -----                            -------                                ------
     character module                 1.03     22.2±0.41ms        ? B/sec    1.00     21.6±0.53ms        ? B/sec
@@ -147,7 +147,7 @@ function convertToMarkdown(results) {
         let masterErrorSecs = convertDurToSeconds(masterDurSplit[1].slice(0, -2), masterUnits);
 
         let difference = -(1 - changesDurSecs / masterDurSecs) * 100;
-        difference = (changesDurSecs <= masterDurSecs ? "-" : "+") + difference.toFixed(2) + "%";
+        difference = (changesDurSecs <= masterDurSecs ? "" : "+") + difference.toFixed(2) + "%";
         if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
           if (changesDurSecs < masterDurSecs) {
             changesDuration = `**${changesDuration}**`;
@@ -187,7 +187,7 @@ ${benchResults}
 }
 
 function convertToTableObject(results) {
-  /* Example results: 
+  /* Example results:
     group                            changes                                master
     -----                            -------                                ------
     character module                 1.03     22.2±0.41ms        ? B/sec    1.00     21.6±0.53ms        ? B/sec
