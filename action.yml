@@ -1,4 +1,4 @@
-name: "Criterion Compare 2"
+name: "Criterion Compare"
 description: "Run Criterion against PRs"
 inputs:
   token:
