@@ -133,6 +133,7 @@ function convertToMarkdown(results) {
           return "";
         }
 
+        let difference = "N/A";
         if (!masterUndefined && !changesUndefined) {
           changesFactor = Number(changesFactor);
           masterFactor = Number(masterFactor);
@@ -147,7 +148,7 @@ function convertToMarkdown(results) {
           let masterDurSecs = convertDurToSeconds(masterDurSplit[0], masterUnits);
           let masterErrorSecs = convertDurToSeconds(masterDurSplit[1].slice(0, -2), masterUnits);
 
-          let difference = -(1 - changesDurSecs / masterDurSecs) * 100;
+          difference = -(1 - changesDurSecs / masterDurSecs) * 100;
           difference = (changesDurSecs <= masterDurSecs ? "" : "+") + difference.toFixed(2) + "%";
           if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
             if (changesDurSecs < masterDurSecs) {
@@ -162,12 +163,10 @@ function convertToMarkdown(results) {
 
         if (masterUndefined) {
           masterDuration = "N/A";
-          difference = "N/A"
         }
 
         if (changesUndefined) {
           changesDuration = "N/A";
-          difference = "N/A"
         }
 
         return `| ${name} | ${changesDuration} | ${masterDuration} | ${difference} |`;
