@@ -133,29 +133,31 @@ function convertToMarkdown(results) {
           return "";
         }
 
-        changesFactor = Number(changesFactor);
-        masterFactor = Number(masterFactor);
+        if (!masterUndefined && !changesUndefined) {
+          changesFactor = Number(changesFactor);
+          masterFactor = Number(masterFactor);
 
-        let changesDurSplit = changesDuration.split('±');
-        let changesUnits = changesDurSplit[1].slice(-2);
-        let changesDurSecs = convertDurToSeconds(changesDurSplit[0], changesUnits);
-        let changesErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
+          let changesDurSplit = changesDuration.split('±');
+          let changesUnits = changesDurSplit[1].slice(-2);
+          let changesDurSecs = convertDurToSeconds(changesDurSplit[0], changesUnits);
+          let changesErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
 
-        let masterDurSplit = masterDuration.split('±');
-        let masterUnits = masterDurSplit[1].slice(-2);
-        let masterDurSecs = convertDurToSeconds(masterDurSplit[0], masterUnits);
-        let masterErrorSecs = convertDurToSeconds(masterDurSplit[1].slice(0, -2), masterUnits);
+          let masterDurSplit = masterDuration.split('±');
+          let masterUnits = masterDurSplit[1].slice(-2);
+          let masterDurSecs = convertDurToSeconds(masterDurSplit[0], masterUnits);
+          let masterErrorSecs = convertDurToSeconds(masterDurSplit[1].slice(0, -2), masterUnits);
 
-        let difference = -(1 - changesDurSecs / masterDurSecs) * 100;
-        difference = (changesDurSecs <= masterDurSecs ? "" : "+") + difference.toFixed(2) + "%";
-        if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
-          if (changesDurSecs < masterDurSecs) {
-            changesDuration = `**${changesDuration}**`;
-          } else if (changesDurSecs > masterDurSecs) {
-            masterDuration = `**${masterDuration}**`;
+          let difference = -(1 - changesDurSecs / masterDurSecs) * 100;
+          difference = (changesDurSecs <= masterDurSecs ? "" : "+") + difference.toFixed(2) + "%";
+          if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
+            if (changesDurSecs < masterDurSecs) {
+              changesDuration = `**${changesDuration}**`;
+            } else if (changesDurSecs > masterDurSecs) {
+              masterDuration = `**${masterDuration}**`;
+            }
+
+            difference = `**${difference}**`;
           }
-
-          difference = `**${difference}**`;
         }
 
         if (masterUndefined) {
