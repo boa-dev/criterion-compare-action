@@ -1,4 +1,4 @@
-name: "Criterion Compare"
+name: "Criterion Compare Action"
 description: "Run Criterion against PRs"
 inputs:
   token:
