@@ -27,5 +27,6 @@ jobs:
       - uses: jasonwilliams/criterion-compare-action@move_to_actions
         with:
           cwd: "subDirectory (optional)"
+          benchName: "example-bench-target" # Optional. Compare only this benchmark target
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
