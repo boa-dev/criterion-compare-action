@@ -14,6 +14,11 @@ async function main() {
   if ((cwd = core.getInput("cwd"))) {
     options.cwd = cwd;
   }
+  
+  benchCmd = ["bench"];
+  if ((cargoBenchName = core.getInput("benchName"))) {
+    benchCmd = benchCmd.concat(["--bench", cargoBenchName]);
+  }
 
   core.debug("### Install Critcmp ###");
   await exec.exec("cargo", ["install", "critcmp"]);
@@ -21,7 +26,7 @@ async function main() {
   core.debug("### Benchmark starting ###");
   await exec.exec(
     "cargo",
-    ["bench", "--", "--save-baseline", "changes"],
+    benchCmd.concat(["--", "--save-baseline", "changes"]),
     options
   );
   core.debug("Changes benchmarked");
@@ -29,7 +34,7 @@ async function main() {
   core.debug("Checked out to master branch");
   await exec.exec(
     "cargo",
-    ["bench", "--", "--save-baseline", "master"],
+    benchCmd.concat(["--", "--save-baseline", "master"]),
     options
   );
   core.debug("Master benchmarked");
