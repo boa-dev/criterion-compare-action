@@ -117,7 +117,7 @@ function convertToMarkdown(results) {
     full prompt                      1.08     46.0±0.90ms        ? B/sec    1.00     42.7±0.79ms        ? B/sec
   */
 
-  let resultLines = results.split("\n");
+  let resultLines = results.trimRight().split("\n");
   let benchResults = resultLines
     .slice(2) // skip headers
     .map((row) => row.split(/\s{2,}/)) // split if 2+ spaces together
