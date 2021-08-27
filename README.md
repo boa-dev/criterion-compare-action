@@ -33,4 +33,4 @@ jobs:
 
 ## Troubleshooting
 ### Unrecognized option: 'save-baseline'
-If you encounter this error, you can check [this Criterion FAQ], to find a workaround.
+If you encounter this error, you can check [this Criterion FAQ](https://bheisler.github.io/criterion.rs/book/faq.html#cargo-bench-gives-unrecognized-option-errors-for-valid-command-line-options), to find a workaround.
