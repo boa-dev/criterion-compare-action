@@ -30,14 +30,14 @@ async function main() {
     options
   );
   core.debug("Changes benchmarked");
-  await exec.exec("git", ["checkout", "master"]);
-  core.debug("Checked out to master branch");
+  await exec.exec("git", ["checkout", { github.base_ref }]);
+  core.debug("Checked out to base branch");
   await exec.exec(
     "cargo",
-    benchCmd.concat(["--", "--save-baseline", "master"]),
+    benchCmd.concat(["--", "--save-baseline", "base"]),
     options
   );
-  core.debug("Master benchmarked");
+  core.debug("Base benchmarked");
 
   options.listeners = {
     stdout: (data) => {
@@ -48,7 +48,7 @@ async function main() {
     },
   };
 
-  await exec.exec("critcmp", ["master", "changes"], options);
+  await exec.exec("critcmp", ["base", "changes"], options);
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
