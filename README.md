@@ -27,7 +27,10 @@ jobs:
       - uses: jasonwilliams/criterion-compare-action@move_to_actions
         with:
           cwd: "subDirectory (optional)"
-          benchName: "example-bench-target" # Optional. Compare only this benchmark target
+          # Optional. Compare only this benchmark target
+          benchName: "example-bench-target" 
+          # Needed. The name of the branch to compare with.  This default uses the branch which is being pulled against
+          branchName: ${{ github.base_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
