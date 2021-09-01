@@ -30,7 +30,7 @@ async function main() {
     options
   );
   core.debug("Changes benchmarked");
-  await exec.exec("git", ["checkout", { github.base_ref }]);
+  await exec.exec("git", ["checkout", core.getInput("branchName") ]);
   core.debug("Checked out to base branch");
   await exec.exec(
     "cargo",
