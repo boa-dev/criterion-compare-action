@@ -14,7 +14,7 @@ async function main() {
   if ((cwd = core.getInput("cwd"))) {
     options.cwd = cwd;
   }
-  
+
   benchCmd = ["bench"];
   if ((cargoBenchName = core.getInput("benchName"))) {
     benchCmd = benchCmd.concat(["--bench", cargoBenchName]);
@@ -30,7 +30,7 @@ async function main() {
     options
   );
   core.debug("Changes benchmarked");
-  await exec.exec("git", ["checkout", core.getInput("branchName") ]);
+  await exec.exec("git", ["checkout", core.getInput("branchName") || github.base_ref]);
   core.debug("Checked out to base branch");
   await exec.exec(
     "cargo",
