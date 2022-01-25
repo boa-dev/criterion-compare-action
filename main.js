@@ -100,18 +100,18 @@ function convertDurToSeconds(dur, units) {
   return seconds;
 }
 
-function isSignificant(changesDur, changesErr, masterDur, masterErr) {
-  if (changesDur < masterDur) {
-    return changesDur + changesErr < masterDur || masterDur - masterErr > changesDur;
+function isSignificant(changesDur, changesErr, baseDur, baseErr) {
+  if (changesDur < baseDur) {
+    return changesDur + changesErr < baseDur || baseDur - baseErr > changesDur;
   } else {
-    return changesDur - changesErr > masterDur || masterDur + masterErr < changesDur;
+    return changesDur - changesErr > baseDur || baseDur + baseErr < changesDur;
   }
 }
 
 function convertToMarkdown(results) {
   /* Example results:
-    group                            changes                                master
-    -----                            -------                                ------
+    group                            base                                   changes
+    -----                            ----                                   -------
     character module                 1.03     22.2±0.41ms        ? B/sec    1.00     21.6±0.53ms        ? B/sec
     directory module – home dir      1.02     21.7±0.69ms        ? B/sec    1.00     21.4±0.44ms        ? B/sec
     full prompt                      1.08     46.0±0.90ms        ? B/sec    1.00     42.7±0.79ms        ? B/sec
@@ -124,57 +124,57 @@ function convertToMarkdown(results) {
     .map(
       ([
         name,
+        baseFactor,
+        baseDuration,
+        _baseBandwidth,
         changesFactor,
         changesDuration,
         _changesBandwidth,
-        masterFactor,
-        masterDuration,
-        _masterBandwidth,
       ]) => {
-        let masterUndefined = typeof masterDuration === "undefined";
+        let baseUndefined = typeof baseDuration === "undefined";
         let changesUndefined = typeof changesDuration === "undefined";
 
-        if (!name || (masterUndefined && changesUndefined)) {
+        if (!name || (baseUndefined && changesUndefined)) {
           return "";
         }
 
         let difference = "N/A";
-        if (!masterUndefined && !changesUndefined) {
+        if (!baseUndefined && !changesUndefined) {
           changesFactor = Number(changesFactor);
-          masterFactor = Number(masterFactor);
+          baseFactor = Number(baseFactor);
 
           let changesDurSplit = changesDuration.split('±');
           let changesUnits = changesDurSplit[1].slice(-2);
           let changesDurSecs = convertDurToSeconds(changesDurSplit[0], changesUnits);
           let changesErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
 
-          let masterDurSplit = masterDuration.split('±');
-          let masterUnits = masterDurSplit[1].slice(-2);
-          let masterDurSecs = convertDurToSeconds(masterDurSplit[0], masterUnits);
-          let masterErrorSecs = convertDurToSeconds(masterDurSplit[1].slice(0, -2), masterUnits);
+          let baseDurSplit = baseDuration.split('±');
+          let baseUnits = baseDurSplit[1].slice(-2);
+          let baseDurSecs = convertDurToSeconds(baseDurSplit[0], baseUnits);
+          let baseErrorSecs = convertDurToSeconds(baseDurSplit[1].slice(0, -2), baseUnits);
 
-          difference = -(1 - changesDurSecs / masterDurSecs) * 100;
-          difference = (changesDurSecs <= masterDurSecs ? "" : "+") + difference.toFixed(2) + "%";
-          if (isSignificant(changesDurSecs, changesErrorSecs, masterDurSecs, masterErrorSecs)) {
-            if (changesDurSecs < masterDurSecs) {
+          difference = -(1 - changesDurSecs / baseDurSecs) * 100;
+          difference = (changesDurSecs <= baseDurSecs ? "" : "+") + difference.toFixed(2) + "%";
+          if (isSignificant(changesDurSecs, changesErrorSecs, baseDurSecs, baseErrorSecs)) {
+            if (changesDurSecs < baseDurSecs) {
               changesDuration = `**${changesDuration}**`;
-            } else if (changesDurSecs > masterDurSecs) {
-              masterDuration = `**${masterDuration}**`;
+            } else if (changesDurSecs > baseDurSecs) {
+              baseDuration = `**${baseDuration}**`;
             }
 
             difference = `**${difference}**`;
           }
         }
 
-        if (masterUndefined) {
-          masterDuration = "N/A";
+        if (baseUndefined) {
+          baseDuration = "N/A";
         }
 
         if (changesUndefined) {
           changesDuration = "N/A";
         }
 
-        return `| ${name} | ${changesDuration} | ${masterDuration} | ${difference} |`;
+        return `| ${name} | ${baseDuration} | ${changesDuration} | ${difference} |`;
       }
     )
     .join("\n");
@@ -183,8 +183,7 @@ function convertToMarkdown(results) {
   return `## Benchmark for ${shortSha}
   <details>
     <summary>Click to view benchmark</summary>
-
-| Test | PR Benchmark | Master Benchmark | % |
+| Test | Base         | PR               | % |
 |------|--------------|------------------|---|
 ${benchResults}
 
@@ -194,8 +193,8 @@ ${benchResults}
 
 function convertToTableObject(results) {
   /* Example results:
-    group                            changes                                master
-    -----                            -------                                ------
+    group                            base                                   changes
+    -----                            ----                                   -------
     character module                 1.03     22.2±0.41ms        ? B/sec    1.00     21.6±0.53ms        ? B/sec
     directory module – home dir      1.02     21.7±0.69ms        ? B/sec    1.00     21.4±0.44ms        ? B/sec
     full prompt                      1.08     46.0±0.90ms        ? B/sec    1.00     42.7±0.79ms        ? B/sec
@@ -208,30 +207,30 @@ function convertToTableObject(results) {
     .map(
       ([
         name,
+        baseFactor,
+        baseDuration,
+        _baseBandwidth,
         changesFactor,
         changesDuration,
         _changesBandwidth,
-        masterFactor,
-        masterDuration,
-        _masterBandwidth,
       ]) => {
         changesFactor = Number(changesFactor);
-        masterFactor = Number(masterFactor);
+        baseFactor = Number(baseFactor);
 
-        let difference = -(1 - changesFactor / masterFactor) * 100;
+        let difference = -(1 - changesFactor / baseFactor) * 100;
         difference =
-          (changesFactor <= masterFactor ? "" : "+") +
+          (changesFactor <= baseFactor ? "" : "+") +
           difference.toPrecision(2);
-        if (changesFactor < masterFactor) {
+        if (changesFactor < baseFactor) {
           changesDuration = `**${changesDuration}**`;
-        } else if (changesFactor > masterFactor) {
-          masterDuration = `**${masterDuration}**`;
+        } else if (changesFactor > baseFactor) {
+          baseDuration = `**${baseDuration}**`;
         }
 
         return {
           name,
+          baseDuration,
           changesDuration,
-          masterDuration,
           difference,
         };
       }
