@@ -70,7 +70,7 @@ async function main() {
     const resultsAsObject = convertToTableObject(myOutput);
     console.table(resultsAsObject);
 
-    core.debug(e);
+    core.debug(JSON.stringify(e));
     core.debug("Failed to comment");
   }
 
