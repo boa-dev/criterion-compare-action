@@ -5,19 +5,24 @@ const github = require("@actions/github");
 const context = github.context;
 
 async function main() {
-  const myToken = core.getInput("token", { required: true });
-  const options = {};
-  let myOutput;
-  let myError;
-  let cwd;
+  const inputs = {
+    token: core.getInput("token", { required: true }),
+    branchName: core.getInput("branchName", { required: true }),
+    cwd: core.getInput("cwd"),
+    benchName: core.getInput("benchName"),
+  };
+  core.debug(`Inputs: ${inspect(inputs)}`);
 
-  if ((cwd = core.getInput("cwd"))) {
-    options.cwd = cwd;
+  const options = {};
+  let myOutput = "";
+  let myError = "";
+  if (inputs.cwd) {
+    options.cwd = inputs.cwd;
   }
 
-  benchCmd = ["bench"];
-  if ((cargoBenchName = core.getInput("benchName"))) {
-    benchCmd = benchCmd.concat(["--bench", cargoBenchName]);
+  let benchCmd = ["bench"];
+  if (inputs.benchName) {
+    benchCmd = benchCmd.concat(["--bench", inputs.benchName]);
   }
 
   core.debug("### Install Critcmp ###");
@@ -30,7 +35,10 @@ async function main() {
     options
   );
   core.debug("Changes benchmarked");
-  await exec.exec("git", ["checkout", core.getInput("branchName") || github.base_ref]);
+  await exec.exec("git", [
+    "checkout",
+    core.getInput("branchName") || github.base_ref,
+  ]);
   core.debug("Checked out to base branch");
   await exec.exec(
     "cargo",
@@ -49,29 +57,37 @@ async function main() {
   };
 
   await exec.exec("critcmp", ["base", "changes"], options);
+
+  core.setOutput("stdout", myOutput);
+  core.setOutput("stderr", myError);
+
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
-  const octokit = github.getOctokit(myToken);
+  const octokit = github.getOctokit(inputs.token);
 
   const contextObj = { ...context.issue };
+  core.debug(`Context: ${inspect(contextObj)}`);
 
   try {
-    await octokit.issues.createComment({
+    const { data: comment } = await octokit.rest.issues.createComment({
       owner: contextObj.owner,
       repo: contextObj.repo,
       issue_number: contextObj.number,
       body: resultsAsMarkdown,
     });
-  } catch (e) {
+    core.info(
+      `Created comment id '${comment.id}' on issue '${inputs.issueNumber}'.`
+    );
+    core.setOutput("comment-id", comment.id);
+  } catch (err) {
+    core.warning(`Failed to comment: ${err}`);
+
     // If we can't post to the comment, display results here.
     // forkedRepos only have READ ONLY access on GITHUB_TOKEN
     // https://github.community/t5/GitHub-Actions/quot-Resource-not-accessible-by-integration-quot-for-adding-a/td-p/33925
     const resultsAsObject = convertToTableObject(myOutput);
     console.table(resultsAsObject);
-
-    core.debug(JSON.stringify(e));
-    core.debug("Failed to comment");
   }
 
   core.debug("Succesfully run!");
@@ -143,19 +159,38 @@ function convertToMarkdown(results) {
           changesFactor = Number(changesFactor);
           baseFactor = Number(baseFactor);
 
-          let changesDurSplit = changesDuration.split('±');
+          let changesDurSplit = changesDuration.split("±");
           let changesUnits = changesDurSplit[1].slice(-2);
-          let changesDurSecs = convertDurToSeconds(changesDurSplit[0], changesUnits);
-          let changesErrorSecs = convertDurToSeconds(changesDurSplit[1].slice(0, -2), changesUnits);
+          let changesDurSecs = convertDurToSeconds(
+            changesDurSplit[0],
+            changesUnits
+          );
+          let changesErrorSecs = convertDurToSeconds(
+            changesDurSplit[1].slice(0, -2),
+            changesUnits
+          );
 
-          let baseDurSplit = baseDuration.split('±');
+          let baseDurSplit = baseDuration.split("±");
           let baseUnits = baseDurSplit[1].slice(-2);
           let baseDurSecs = convertDurToSeconds(baseDurSplit[0], baseUnits);
-          let baseErrorSecs = convertDurToSeconds(baseDurSplit[1].slice(0, -2), baseUnits);
+          let baseErrorSecs = convertDurToSeconds(
+            baseDurSplit[1].slice(0, -2),
+            baseUnits
+          );
 
           difference = -(1 - changesDurSecs / baseDurSecs) * 100;
-          difference = (changesDurSecs <= baseDurSecs ? "" : "+") + difference.toFixed(2) + "%";
-          if (isSignificant(changesDurSecs, changesErrorSecs, baseDurSecs, baseErrorSecs)) {
+          difference =
+            (changesDurSecs <= baseDurSecs ? "" : "+") +
+            difference.toFixed(2) +
+            "%";
+          if (
+            isSignificant(
+              changesDurSecs,
+              changesErrorSecs,
+              baseDurSecs,
+              baseErrorSecs
+            )
+          ) {
             if (changesDurSecs < baseDurSecs) {
               changesDuration = `**${changesDuration}**`;
             } else if (changesDurSecs > baseDurSecs) {
@@ -219,8 +254,7 @@ function convertToTableObject(results) {
 
         let difference = -(1 - changesFactor / baseFactor) * 100;
         difference =
-          (changesFactor <= baseFactor ? "" : "+") +
-          difference.toPrecision(2);
+          (changesFactor <= baseFactor ? "" : "+") + difference.toPrecision(2);
         if (changesFactor < baseFactor) {
           changesDuration = `**${changesDuration}**`;
         } else if (changesFactor > baseFactor) {
