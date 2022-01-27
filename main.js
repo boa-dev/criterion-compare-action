@@ -68,7 +68,6 @@ async function main() {
   const octokit = github.getOctokit(inputs.token);
 
   const contextObj = { ...context.issue };
-  core.debug(`Context: ${inspect(contextObj)}`);
 
   try {
     const { data: comment } = await octokit.rest.issues.createComment({
@@ -219,6 +218,7 @@ function convertToMarkdown(results) {
   return `## Benchmark for ${shortSha}
   <details>
     <summary>Click to view benchmark</summary>
+
 | Test | Base         | PR               | % |
 |------|--------------|------------------|---|
 ${benchResults}
