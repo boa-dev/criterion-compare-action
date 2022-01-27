@@ -1,3 +1,4 @@
+const { inspect } = require("util");
 const exec = require("@actions/exec");
 const core = require("@actions/core");
 const github = require("@actions/github");
@@ -77,7 +78,7 @@ async function main() {
       body: resultsAsMarkdown,
     });
     core.info(
-      `Created comment id '${comment.id}' on issue '${inputs.issueNumber}'.`
+      `Created comment id '${comment.id}' on issue '${contextObj.number}'.`
     );
     core.setOutput("comment-id", comment.id);
   } catch (err) {
