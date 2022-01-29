@@ -2,13 +2,21 @@ name: "Criterion Compare PRs"
 description: "Run Criterion against PRs"
 inputs:
   token:
-    description: "Github Token required to upload to the PR"
+    description: "Github Token required to comment in the PR"
+    required: true
+    default: ""
+  branchName:
+    description: "The name of the branch to compare with. This default uses the branch which is being pulled against"
     required: true
     default: ""
   cwd:
     description: "Sets the directory to run the benchmarks, relative to the project directory"
     required: false
     default: ""
+  benchName:
+    description: "Compare only this benchmark"
+    required: false
+    default: ""
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"
