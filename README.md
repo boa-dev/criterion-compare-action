@@ -30,6 +30,8 @@ jobs:
           cwd: "subDirectory (optional)"
           # Optional. Compare only this benchmark target
           benchName: "example-bench-target"
+          # Optional. Features activated in the benchmark
+          features: "async,tokio-support"
           # Needed. The name of the branch to compare with. This default uses the branch which is being pulled against
           branchName: ${{ github.base_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -17,6 +17,10 @@ inputs:
     description: "Compare only this benchmark"
     required: false
     default: ""
+  features:
+    description: "A list of comma seperated features that are activated for this benchmark"
+    required: false
+    default: ""
 runs:
   using: "node16"
   main: "dist/index.js"
