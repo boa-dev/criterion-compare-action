@@ -11,6 +11,7 @@ async function main() {
     branchName: core.getInput("branchName", { required: true }),
     cwd: core.getInput("cwd"),
     benchName: core.getInput("benchName"),
+    features: core.getInput("features"),
   };
   core.debug(`Inputs: ${inspect(inputs)}`);
 
@@ -24,6 +25,10 @@ async function main() {
   let benchCmd = ["bench"];
   if (inputs.benchName) {
     benchCmd = benchCmd.concat(["--bench", inputs.benchName]);
+  }
+
+  if (inputs.features) {
+    benchCmd = benchCmd.concat(["--features", inputs.features]);
   }
 
   core.debug("### Install Critcmp ###");
