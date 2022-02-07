@@ -12,6 +12,7 @@ async function main() {
     cwd: core.getInput("cwd"),
     benchName: core.getInput("benchName"),
     features: core.getInput("features"),
+    noDefaultFeatures: core.getInput("noDefaultFeatures"),
   };
   core.debug(`Inputs: ${inspect(inputs)}`);
 
@@ -25,6 +26,10 @@ async function main() {
   let benchCmd = ["bench"];
   if (inputs.benchName) {
     benchCmd = benchCmd.concat(["--bench", inputs.benchName]);
+  }
+
+  if (inputs.noDefaultFeatures) {
+    benchCmd = benchCmd.concat(["--no-default-features"]);
   }
 
   if (inputs.features) {

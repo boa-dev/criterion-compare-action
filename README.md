@@ -30,6 +30,8 @@ jobs:
           cwd: "subDirectory (optional)"
           # Optional. Compare only this benchmark target
           benchName: "example-bench-target"
+          # Optional. Disable the default features of a crate
+          noDefaultFeatures: true
           # Optional. Features activated in the benchmark
           features: "async,tokio-support"
           # Needed. The name of the branch to compare with. This default uses the branch which is being pulled against
