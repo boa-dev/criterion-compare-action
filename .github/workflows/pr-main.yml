@@ -1,0 +1,22 @@
+name: PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checkDist:
+    name: CheckDist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+      - name: Check if generated code is correct
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: mv dist/index.js dist/index.js.new
+      - run: npm ci
+      - run: npm run build
+      - run: diff dist/index.js dist/index.js.new
