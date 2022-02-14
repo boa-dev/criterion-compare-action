@@ -21,6 +21,10 @@ inputs:
     description: "A list of comma seperated features that are activated for this benchmark"
     required: false
     default: ""
+  defaultFeatures:
+    description: "Enable the default features of a crate while running the benchmark, usually the default features are enabled"
+    required: false
+    default: true
 runs:
   using: "node16"
   main: "dist/index.js"
