@@ -9,7 +9,7 @@ LABEL "com.github.actions.color"="purple"
 RUN cargo install critcmp
 
 # Install Node.js
-ENV NODE_VERSION 12.0.0
+ENV NODE_VERSION 16.0.0
 ENV PATH /root/.nvm/versions/node/v$NODE_VERSION/bin:$PATH
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 # Check that Node.js was correctly installed
