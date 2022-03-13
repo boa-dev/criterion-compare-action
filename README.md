@@ -36,6 +36,7 @@ jobs:
           features: "async,tokio-support"
           # Needed. The name of the branch to compare with. This default uses the branch which is being pulled against
           branchName: ${{ github.base_ref }}
+          # Optional. Default is `${{ github.token }}`.
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
