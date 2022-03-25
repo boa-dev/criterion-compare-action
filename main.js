@@ -220,7 +220,7 @@ function convertToMarkdown(results) {
           changesDuration = "N/A";
         }
 
-        name = name.replace("|", "\\|");
+        name = name.replace(/\|/g, "\\|");
 
         return `| ${name} | ${baseDuration} | ${changesDuration} | ${difference} |`;
       }
