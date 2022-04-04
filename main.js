@@ -92,7 +92,7 @@ async function main() {
     core.setOutput("comment-id", comment.id);
   } catch (err) {
     core.warning(`Failed to comment: ${err}`);
-    core.info('Commenting is not possible from forks.');
+    core.info("Commenting is not possible from forks.");
 
     // If we can't post to the comment, display results here.
     // forkedRepos only have READ ONLY access on GITHUB_TOKEN
