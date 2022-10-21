@@ -24,8 +24,8 @@ jobs:
     name: run benchmark
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: boa-dev/criterion-compare-action@v3.0.0
+      - uses: actions/checkout@v3
+      - uses: boa-dev/criterion-compare-action@v3
         with:
           cwd: "subDirectory (optional)"
           # Optional. Compare only this benchmark target
