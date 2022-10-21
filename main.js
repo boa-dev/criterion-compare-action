@@ -46,6 +46,7 @@ async function main() {
     options
   );
   core.debug("Changes benchmarked");
+  await exec.exec("git", ["fetch"]);
   await exec.exec("git", [
     "checkout",
     core.getInput("branchName") || github.base_ref,
