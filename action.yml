@@ -25,6 +25,10 @@ inputs:
     description: "Enable the default features of a crate while running the benchmark, usually the default features are enabled"
     required: false
     default: true
+  behaviour:
+    description: "Whether to `update` an existing comment (default) or to `create` a new comment with the results"
+    required: false
+    default: "update"
 runs:
   using: "node16"
   main: "dist/index.js"
