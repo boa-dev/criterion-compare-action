@@ -281,7 +281,7 @@ async function saveComment(inputs, markdown, fallbackOutput) {
   );
 
   try {
-    if (inputs.behaviour === "" && existingComment) {
+    if (inputs.behaviour === "update" && existingComment) {
       core.debug(`Updating existing comment #${existingComment.id}`);
 
       await octokit.rest.issues.updateComment({
