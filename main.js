@@ -13,6 +13,7 @@ async function main() {
     benchName: core.getInput("benchName"),
     features: core.getInput("features"),
     defaultFeatures: core.getInput("defaultFeatures"),
+    behaviour: core.getInput("behaviour"),
   };
   core.debug(`Inputs: ${inspect(inputs)}`);
 
@@ -75,32 +76,7 @@ async function main() {
 
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
-  // An authenticated instance of `@octokit/rest`
-  const octokit = github.getOctokit(inputs.token);
-
-  const contextObj = { ...context.issue };
-
-  try {
-    const { data: comment } = await octokit.rest.issues.createComment({
-      owner: contextObj.owner,
-      repo: contextObj.repo,
-      issue_number: contextObj.number,
-      body: resultsAsMarkdown,
-    });
-    core.info(
-      `Created comment id '${comment.id}' on issue '${contextObj.number}' in '${contextObj.repo}'.`
-    );
-    core.setOutput("comment-id", comment.id);
-  } catch (err) {
-    core.warning(`Failed to comment: ${err}`);
-    core.info("Commenting is not possible from forks.");
-
-    // If we can't post to the comment, display results here.
-    // forkedRepos only have READ ONLY access on GITHUB_TOKEN
-    // https://github.community/t5/GitHub-Actions/quot-Resource-not-accessible-by-integration-quot-for-adding-a/td-p/33925
-    const resultsAsObject = convertToTableObject(myOutput);
-    console.table(resultsAsObject);
-  }
+  await saveComment(inputs, resultsAsMarkdown, myOutput);
 
   core.debug("Succesfully run!");
 }
@@ -286,6 +262,60 @@ function convertToTableObject(results) {
     );
 
   return benchResults;
+}
+
+async function saveComment(inputs, markdown, fallbackOutput) {
+  const octokit = github.getOctokit(inputs.token);
+  const contextObj = { ...context.issue };
+
+  const commentToken = `<!-- criterion-benchmark-compare: ${
+    contextObj.repo + contextObj.number || "unknown"
+  } -->`;
+
+  const { data: comments } = await octokit.rest.issues.listComments({
+    ...contextObj.repo,
+    issue_number: contextObj.number,
+  });
+  const existingComment = comments.find((comment) =>
+    comment.body?.includes(commentToken)
+  );
+
+  try {
+    if (inputs.behaviour === "update" && existingComment) {
+      core.debug(`Updating existing comment #${existingComment.id}`);
+
+      await octokit.rest.issues.updateComment({
+        owner: contextObj.owner,
+        repo: contextObj.repo,
+        issue_number: contextObj.number,
+        body: markdown,
+        comment_id: existingComment.id,
+      });
+    } else {
+      core.debug("Creating a new comment");
+
+      const { data: comment } = await octokit.rest.issues.createComment({
+        owner: contextObj.owner,
+        repo: contextObj.repo,
+        issue_number: contextObj.number,
+        body: markdown,
+      });
+
+      core.debug(
+        `Created comment id '${comment.id}' on issue '${contextObj.number}' in '${contextObj.repo}'.`
+      );
+      core.setOutput("comment-id", comment.id);
+    }
+  } catch (err) {
+    core.warning(`Failed to comment: ${err}`);
+    core.info("Commenting is not possible from forks.");
+
+    // If we can't post to the comment, display results here.
+    // forkedRepos only have READ ONLY access on GITHUB_TOKEN
+    // https://github.community/t5/GitHub-Actions/quot-Resource-not-accessible-by-integration-quot-for-adding-a/td-p/33925
+    const resultsAsObject = convertToTableObject(fallbackOutput);
+    console.table(resultsAsObject);
+  }
 }
 
 // IIFE to be able to use async/await
