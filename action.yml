@@ -13,6 +13,10 @@ inputs:
     description: "Sets the directory to run the benchmarks, relative to the project directory"
     required: false
     default: ""
+  package:
+    description: "Sets an specific package to run the benchmarks"
+    required: false
+    default: ""
   benchName:
     description: "Compare only this benchmark"
     required: false
