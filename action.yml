@@ -14,7 +14,7 @@ inputs:
     required: false
     default: ""
   package:
-    description: "Sets an specific package to run the benchmarks"
+    description: "Benchmark only the specified packages"
     required: false
     default: ""
   benchName:
