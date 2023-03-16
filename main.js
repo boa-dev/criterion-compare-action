@@ -11,6 +11,7 @@ async function main() {
     branchName: core.getInput("branchName", { required: true }),
     cwd: core.getInput("cwd"),
     benchName: core.getInput("benchName"),
+    package: core.getInput("package"),
     features: core.getInput("features"),
     defaultFeatures: core.getInput("defaultFeatures"),
   };
@@ -24,6 +25,11 @@ async function main() {
   }
 
   let benchCmd = ["bench"];
+  
+  if (inputs.package) {
+    benchCmd = benchCmd.concat(["--package", inputs.package]);
+  }
+
   if (inputs.benchName) {
     benchCmd = benchCmd.concat(["--bench", inputs.benchName]);
   }

@@ -28,6 +28,8 @@ jobs:
       - uses: boa-dev/criterion-compare-action@v3
         with:
           cwd: "subDirectory (optional)"
+          # Optional. Compare only this package
+          package: "example-package"
           # Optional. Compare only this benchmark target
           benchName: "example-bench-target"
           # Optional. Disables the default features of a crate
