@@ -25,7 +25,7 @@ async function main() {
   }
 
   let benchCmd = ["bench"];
-  
+
   if (inputs.package) {
     benchCmd = benchCmd.concat(["--package", inputs.package]);
   }
