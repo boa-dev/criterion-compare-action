@@ -29,6 +29,10 @@ inputs:
     description: "Enable the default features of a crate while running the benchmark, usually the default features are enabled"
     required: false
     default: true
+  before:
+    description: "Run this command before every benchmark"
+    required: false
+    default: ""
 runs:
   using: "node16"
   main: "dist/index.js"

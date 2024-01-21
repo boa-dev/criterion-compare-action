@@ -14,6 +14,7 @@ async function main() {
     package: core.getInput("package"),
     features: core.getInput("features"),
     defaultFeatures: core.getInput("defaultFeatures"),
+    before: core.getInput("before"),
   };
   core.debug(`Inputs: ${inspect(inputs)}`);
 
@@ -45,6 +46,10 @@ async function main() {
   core.debug("### Install Critcmp ###");
   await exec.exec("cargo", ["install", "critcmp"]);
 
+  if (inputs.before) {
+    await exec.exec(inputs.before);
+  }
+
   core.debug("### Benchmark starting ###");
   await exec.exec(
     "cargo",
@@ -58,6 +63,9 @@ async function main() {
     core.getInput("branchName") || github.base_ref,
   ]);
   core.debug("Checked out to base branch");
+  if (inputs.before) {
+    await exec.exec(inputs.before);
+  }
   await exec.exec(
     "cargo",
     benchCmd.concat(["--", "--save-baseline", "base"]),
