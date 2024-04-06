@@ -214,7 +214,9 @@ function convertToMarkdown(results) {
     )
     .join("\n");
 
-  let shortSha = context.sha.slice(0, 7);
+  // Try to use the "after" sha for pull_request events, otherwise default to the event sha.
+  let sha = (context.event_name == 'pull_request' ? context.event.after : context.sha) ?? context.sha;
+  let shortSha = sha.slice(0, 7);
   return `## Benchmark for ${shortSha}
   <details>
     <summary>Click to view benchmark</summary>
