@@ -1,21 +1,28 @@
-const { inspect } = require("util");
-const exec = require("@actions/exec");
-const core = require("@actions/core");
-const github = require("@actions/github");
+import {
+  debug,
+  getInput,
+  info,
+  setFailed,
+  setOutput,
+  warning,
+} from "@actions/core";
+import { exec as _exec } from "@actions/exec";
+import { context as _context, base_ref, getOctokit } from "@actions/github";
+import { inspect } from "util";
 
-const context = github.context;
+const context = _context;
 
 async function main() {
   const inputs = {
-    token: core.getInput("token", { required: true }),
-    branchName: core.getInput("branchName", { required: true }),
-    cwd: core.getInput("cwd"),
-    benchName: core.getInput("benchName"),
-    package: core.getInput("package"),
-    features: core.getInput("features"),
-    defaultFeatures: core.getInput("defaultFeatures"),
+    token: getInput("token", { required: true }),
+    branchName: getInput("branchName", { required: true }),
+    cwd: getInput("cwd"),
+    benchName: getInput("benchName"),
+    package: getInput("package"),
+    features: getInput("features"),
+    defaultFeatures: getInput("defaultFeatures"),
   };
-  core.debug(`Inputs: ${inspect(inputs)}`);
+  debug(`Inputs: ${inspect(inputs)}`);
 
   const options = {};
   let myOutput = "";
@@ -42,28 +49,25 @@ async function main() {
     benchCmd = benchCmd.concat(["--features", inputs.features]);
   }
 
-  core.debug("### Install Critcmp ###");
-  await exec.exec("cargo", ["install", "critcmp"]);
+  debug("### Install Critcmp ###");
+  await _exec("cargo", ["install", "critcmp"]);
 
-  core.debug("### Benchmark starting ###");
-  await exec.exec(
+  debug("### Benchmark starting ###");
+  await _exec(
     "cargo",
     benchCmd.concat(["--", "--save-baseline", "changes"]),
-    options
+    options,
   );
-  core.debug("Changes benchmarked");
-  await exec.exec("git", ["fetch"]);
-  await exec.exec("git", [
-    "checkout",
-    core.getInput("branchName") || github.base_ref,
-  ]);
-  core.debug("Checked out to base branch");
-  await exec.exec(
+  debug("Changes benchmarked");
+  await _exec("git", ["fetch"]);
+  await _exec("git", ["checkout", getInput("branchName") || base_ref]);
+  debug("Checked out to base branch");
+  await _exec(
     "cargo",
     benchCmd.concat(["--", "--save-baseline", "base"]),
-    options
+    options,
   );
-  core.debug("Base benchmarked");
+  debug("Base benchmarked");
 
   options.listeners = {
     stdout: (data) => {
@@ -74,15 +78,15 @@ async function main() {
     },
   };
 
-  await exec.exec("critcmp", ["base", "changes"], options);
+  await _exec("critcmp", ["base", "changes"], options);
 
-  core.setOutput("stdout", myOutput);
-  core.setOutput("stderr", myError);
+  setOutput("stdout", myOutput);
+  setOutput("stderr", myError);
 
   const resultsAsMarkdown = convertToMarkdown(myOutput);
 
   // An authenticated instance of `@octokit/rest`
-  const octokit = github.getOctokit(inputs.token);
+  const octokit = getOctokit(inputs.token);
 
   const contextObj = { ...context.issue };
 
@@ -93,13 +97,13 @@ async function main() {
       issue_number: contextObj.number,
       body: resultsAsMarkdown,
     });
-    core.info(
-      `Created comment id '${comment.id}' on issue '${contextObj.number}' in '${contextObj.repo}'.`
+    info(
+      `Created comment id '${comment.id}' on issue '${contextObj.number}' in '${contextObj.repo}'.`,
     );
-    core.setOutput("comment-id", comment.id);
+    setOutput("comment-id", comment.id);
   } catch (err) {
-    core.warning(`Failed to comment: ${err}`);
-    core.info("Commenting is not possible from forks.");
+    warning(`Failed to comment: ${err}`);
+    info("Commenting is not possible from forks.");
 
     // If we can't post to the comment, display results here.
     // forkedRepos only have READ ONLY access on GITHUB_TOKEN
@@ -108,7 +112,7 @@ async function main() {
     console.table(resultsAsObject);
   }
 
-  core.debug("Succesfully run!");
+  debug("Succesfully run!");
 }
 
 function convertDurToSeconds(dur, units) {
@@ -181,11 +185,11 @@ function convertToMarkdown(results) {
           let changesUnits = changesDurSplit[1].slice(-2);
           let changesDurSecs = convertDurToSeconds(
             changesDurSplit[0],
-            changesUnits
+            changesUnits,
           );
           let changesErrorSecs = convertDurToSeconds(
             changesDurSplit[1].slice(0, -2),
-            changesUnits
+            changesUnits,
           );
 
           let baseDurSplit = baseDuration.split("±");
@@ -193,20 +197,18 @@ function convertToMarkdown(results) {
           let baseDurSecs = convertDurToSeconds(baseDurSplit[0], baseUnits);
           let baseErrorSecs = convertDurToSeconds(
             baseDurSplit[1].slice(0, -2),
-            baseUnits
+            baseUnits,
           );
 
-          difference = -(1 - changesDurSecs / baseDurSecs) * 100;
+          difference = (-(1 - changesDurSecs / baseDurSecs) * 100).toFixed(2);
           difference =
-            (changesDurSecs <= baseDurSecs ? "" : "+") +
-            difference.toFixed(2) +
-            "%";
+            (changesDurSecs <= baseDurSecs ? "" : "+") + difference + "%";
           if (
             isSignificant(
               changesDurSecs,
               changesErrorSecs,
               baseDurSecs,
-              baseErrorSecs
+              baseErrorSecs,
             )
           ) {
             if (changesDurSecs < baseDurSecs) {
@@ -230,7 +232,7 @@ function convertToMarkdown(results) {
         name = name.replace(/\|/g, "\\|");
 
         return `| ${name} | ${baseDuration} | ${changesDuration} | ${difference} |`;
-      }
+      },
     )
     .join("\n");
 
@@ -288,7 +290,7 @@ function convertToTableObject(results) {
           changesDuration,
           difference,
         };
-      }
+      },
     );
 
   return benchResults;
@@ -300,6 +302,6 @@ function convertToTableObject(results) {
     await main();
   } catch (e) {
     console.log(e.stack);
-    core.setFailed(`Unhanded error:\n${e}`);
+    setFailed(`Unhanded error:\n${e}`);
   }
 })();
