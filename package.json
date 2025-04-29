@@ -6,18 +6,20 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write .",
+    "lint": "prettier --check .",
     "build": "ncc build main.js --minify"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@actions/core": "^1.10.0",
+    "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
-    "@actions/github": "^5.1.1"
+    "@actions/github": "^6.0.0"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.36.1",
-    "prettier": "2.8.8"
+    "@vercel/ncc": "^0.38.3",
+    "prettier": "3.5.3"
   }
 }
